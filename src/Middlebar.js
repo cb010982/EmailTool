@@ -1,8 +1,14 @@
 import React from 'react';
+import { useDroppable } from "@dnd-kit/core";
 
-const Middlebar = () => {
+const Middlebar = ({ children }) => {
+  const { setNodeRef } = useDroppable({
+    id: 'middlebar',
+  });
+
   return (
-    <div style={{ width: '40%', height: '100vh', background: 'lightblue' }}>
+    <div ref={setNodeRef} style={{ width: '40%', height: '100vh', background: 'lightblue' }}>
+      {children}
     </div>
   );
 };

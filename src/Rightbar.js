@@ -6,10 +6,10 @@ const sidebar = () => {
     <div style={{ width: '30%', height: '100%', background: 'lightgray' }}>
 
       <Draggable id="draggable1">
-        <div>Draggable Component 1</div>
+        <div>Heading</div>
       </Draggable>
       <Draggable id="draggable2">
-        <div>Draggable Component 2</div>
+        <div>Text</div>
       </Draggable>
       
     </div>
