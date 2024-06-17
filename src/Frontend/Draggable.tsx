@@ -8,7 +8,7 @@ interface IDraggable {
   inMiddleBar?: boolean;
   onDelete?: () => void;
   onDuplicate?: () => void;
-  onEdit?: () => void;
+  onEdit?: (id: string, newContent: string) => void;
 }
 
 const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit }) => {
@@ -29,7 +29,7 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
           <FaEdit 
             onClick={(e) => { 
               e.stopPropagation(); 
-              onEdit && onEdit(); 
+              onEdit && onEdit(id, 'newContent'); // Pass the id and new content
             }} 
             style={{ cursor: 'pointer', margin: '0 5px' }} 
           />
