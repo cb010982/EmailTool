@@ -1,0 +1,27 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "emailing tool",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/cb010982/EmailTool.git"
+  },
+  "author": "Senuji , Achira , Mufa",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cb010982/EmailTool/issues"
+  },
+  "homepage": "https://github.com/cb010982/EmailTool#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "mongoose": "^8.4.1",
+    "nodemon": "^3.1.3"
+  }
+}
