@@ -1,30 +1,47 @@
-import { FC, ReactNode, useMemo } from "react";
+import React from 'react';
 import { useDraggable } from "@dnd-kit/core";
-import React from "react";
+import { FaTrash, FaCopy, FaEdit } from 'react-icons/fa';
 
 interface IDraggable {
   id: string;
-  children: ReactNode;
-  onDuplicate: () => void;
-  onDelete: () => void;
+  children: React.ReactNode;
+  inMiddleBar?: boolean;
+  onDelete?: () => void;
+  onDuplicate?: () => void;
+  onEdit?: () => void;
 }
 
-export const Draggable: FC<IDraggable> = ({ id, children, onDuplicate, onDelete }) => {
-  const { attributes, listeners, setNodeRef, transform } = useDraggable({ id });
-  const style = useMemo(() => {
-    if (transform) {
-      return {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-      };
-    }
-    return undefined;
-  }, [transform]);
+const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit }) => {
+  const { attributes, listeners, setNodeRef } = useDraggable({ id });
 
   return (
-    <div ref={setNodeRef} style={style} {...listeners} {...attributes}>
-      {children}
-      <button onClick={onDuplicate}>Duplicate</button>
-      <button onClick={onDelete}>Delete</button>
+    <div ref={setNodeRef} {...listeners} {...attributes} style={{ padding: '10px', border: '1px solid #ccc', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <div>{children}</div>
+      {inMiddleBar && (
+        <div>
+          <FaCopy 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onDuplicate && onDuplicate(); 
+            }} 
+            style={{ cursor: 'pointer', margin: '0 5px' }} 
+          />
+          <FaEdit 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onEdit && onEdit(); 
+            }} 
+            style={{ cursor: 'pointer', margin: '0 5px' }} 
+          />
+          <FaTrash 
+            onClick={(e) => { 
+              e.stopPropagation(); 
+              onDelete && onDelete(); 
+            }} 
+            style={{ cursor: 'pointer', margin: '0 5px' }} 
+          />
+        </div>
+      )}
     </div>
   );
 };

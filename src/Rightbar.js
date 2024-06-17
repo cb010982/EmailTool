@@ -1,19 +1,17 @@
 import React from 'react';
 import Draggable from './Draggable.tsx'; 
 
-const sidebar = () => {
+const Sidebar = () => {
   return (
-    <div style={{ width: '30%', height: '100%', background: 'lightgray' }}>
-
-      <Draggable id="draggable1">
+    <div style={{ width: '30%', height: '100%', background: 'lightgray', padding: '10px' }}>
+      <Draggable id="Heading">
         <div>Heading</div>
       </Draggable>
-      <Draggable id="draggable2">
+      <Draggable id="Text">
         <div>Text</div>
       </Draggable>
-      
     </div>
   );
 };
 
-export default sidebar;
+export default Sidebar;
