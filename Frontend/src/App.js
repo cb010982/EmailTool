@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import Draggable from './Draggable.tsx';
-import Middlebar from './Middlebar.js'; 
-import Sidebar from './Rightbar.js'; 
-import Leftbar from './Leftbar.js'; 
+import Middlebar from './Middlebar';
+import Sidebar from './Rightbar'; 
+import Leftbar from './Leftbar'; 
 
 function App() {
   const [items, setItems] = useState(['heading', 'text']);
@@ -41,6 +41,18 @@ function App() {
     setDroppedItems((currentItems) => currentItems.map(item => item.id === id ? { ...item, content: newContent } : item));
   }
 
+  function handleDuplicate(id) {
+    // Find the item to duplicate
+    const itemToDuplicate = droppedItems.find(item => item.id === id);
+    if (itemToDuplicate) {
+      // Duplicate the item
+      setDroppedItems((currentItems) => [
+        ...currentItems,
+        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content }
+      ]);
+    }
+  }
+
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div style={{ display: 'flex' }}>
@@ -58,18 +70,19 @@ function App() {
           ))}
         </Sidebar>
         <Middlebar>
-          {droppedItems.map(({ id, content }) => (
-            <Draggable 
-              key={id} 
-              id={id} 
-              inMiddleBar={true} 
-              onDelete={() => handleDelete(id)} 
-              onEdit={handleEdit} 
-            >
-              {content}
-            </Draggable>
-          ))}
-        </Middlebar>
+            {droppedItems.map(({ id, content }) => (
+              <Draggable 
+                key={id} 
+                id={id} 
+                inMiddleBar={true} 
+                onDelete={() => handleDelete(id)} 
+                onEdit={handleEdit}
+                onDuplicate={() => handleDuplicate(id)} // Pass handleDuplicate function
+              >
+                {content}
+              </Draggable>
+            ))}
+          </Middlebar>
         <Leftbar />
       </div>
     </DndContext>
