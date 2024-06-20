@@ -70,19 +70,19 @@ function App() {
           ))}
         </Sidebar>
         <Middlebar>
-            {droppedItems.map(({ id, content }) => (
-              <Draggable 
-                key={id} 
-                id={id} 
-                inMiddleBar={true} 
-                onDelete={() => handleDelete(id)} 
-                onEdit={handleEdit}
-                onDuplicate={() => handleDuplicate(id)} // Pass handleDuplicate function
-              >
-                {content}
-              </Draggable>
-            ))}
-          </Middlebar>
+          {droppedItems.map(({ id, content }) => (
+            <Draggable 
+              key={id} 
+              id={id} 
+              inMiddleBar={true} 
+              onDelete={() => handleDelete(id)} 
+              onEdit={handleEdit}
+              onDuplicate={() => handleDuplicate(id)} // Pass handleDuplicate function
+            >
+              {content}
+            </Draggable>
+          ))}
+        </Middlebar>
         <Leftbar />
       </div>
     </DndContext>

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useDraggable } from "@dnd-kit/core";
 import { FaTrash, FaCopy, FaEdit } from 'react-icons/fa';
 
@@ -15,43 +15,50 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(children);
-  const inputRef = useRef<HTMLInputElement>(null); // Create a ref for the input field
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEditClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Stop propagation of the click event
+    e.stopPropagation();
     setIsEditing(true);
-    // Focus the input field when the edit button is clicked
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
 
   const handleSaveClick = () => {
-    if (onEdit) {
-      if (typeof editContent === 'string') {
-        onEdit(id, editContent);
-      }
+    if (onEdit && typeof editContent === 'string') {
+      onEdit(id, editContent);
     }
     setIsEditing(false);
   };
 
   const handleTextClick = (e: React.MouseEvent) => {
-    e.stopPropagation(); // Stop propagation of the click event
+    e.stopPropagation();
   };
 
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isEditing]);
+
   return (
-    <div ref={setNodeRef} style={{ padding: '10px', border: '1px solid #ccc', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+    <div 
+      ref={setNodeRef} 
+      style={{ padding: '10px', border: '1px solid #ccc', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+    >
       <div {...listeners} {...attributes} style={{ flexGrow: 1, cursor: 'grab' }}>
         {isEditing ? (
           <input 
-            ref={inputRef} // Assign the ref to the input field
-            type="text" 
-            value={typeof editContent === 'string' ? editContent : ''} // Ensure editContent is string type
-            onChange={(e) => setEditContent(e.target.value)} 
+            ref={inputRef}
+            type="text"
+            value={typeof editContent === 'string' ? editContent : ''}
+            onChange={(e) => setEditContent(e.target.value)}
             onBlur={handleSaveClick}
+            onClick={handleTextClick} 
           />
         ) : (
-          <span onClick={handleTextClick}>{children}</span> // Add onClick handler for text
+          <span onClick={handleTextClick}>{children}</span>
         )}
       </div>
       {inMiddleBar && (
@@ -64,7 +71,7 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
             style={{ cursor: 'pointer', margin: '0 5px' }} 
           />
           <FaEdit 
-            onClick={handleEditClick} // Pass handleEditClick directly
+            onClick={handleEditClick} 
             style={{ cursor: 'pointer', margin: '0 5px' }} 
           />
           <FaTrash 
