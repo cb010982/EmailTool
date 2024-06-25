@@ -9,9 +9,12 @@ interface IDraggable {
   onDelete?: () => void;
   onDuplicate?: () => void;
   onEdit?: (id: string, newContent: string) => void;
+  isImage?: boolean;
+  color?: string;
+  fontSize?: number;
 }
 
-const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit }) => {
+const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit, isImage, color, fontSize }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(children);
@@ -45,7 +48,16 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
   return (
     <div 
       ref={setNodeRef} 
-      style={{ padding: '10px', border: '1px solid #ccc', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+      style={{ 
+        padding: '10px', 
+        border: '1px solid #ccc', 
+        background: 'white', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between', 
+        color: color,
+        fontSize: `${fontSize}px`
+      }}
     >
       <div {...listeners} {...attributes} style={{ flexGrow: 1, cursor: 'grab' }}>
         {isEditing ? (
@@ -58,7 +70,7 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
             onClick={handleTextClick} 
           />
         ) : (
-          <span onClick={handleTextClick}>{children}</span>
+          isImage ? <img src={children as string} alt="Dropped Image" style={{ maxWidth: '100%' }} /> : <span onClick={handleTextClick}>{children}</span>
         )}
       </div>
       {inMiddleBar && (

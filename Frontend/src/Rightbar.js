@@ -1,5 +1,5 @@
 import React from 'react';
-import Draggable from './Draggable.tsx'; 
+import Draggable from './Draggable.tsx';
 
 const Sidebar = () => {
   return (
@@ -9,6 +9,9 @@ const Sidebar = () => {
       </Draggable>
       <Draggable id="Text">
         <div>Text</div>
+      </Draggable>
+      <Draggable id="Image" isImage>
+        <div>Image</div>
       </Draggable>
     </div>
   );

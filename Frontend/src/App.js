@@ -6,11 +6,16 @@ import Sidebar from './Rightbar';
 import Leftbar from './Leftbar'; 
 
 function App() {
-  const [items, setItems] = useState(['heading', 'text']);
+  const [items, setItems] = useState(['Heading', 'Text', 'Image']);
   const [droppedItems, setDroppedItems] = useState(() => {
     const savedDroppedItems = localStorage.getItem('droppedItems');
     return savedDroppedItems ? JSON.parse(savedDroppedItems) : [];
   });
+  const [alignment, setAlignment] = useState('left');
+  const [padding, setPadding] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
+  const [color, setColor] = useState('#000000');
+  const [fontSize, setFontSize] = useState(16);
+  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -27,7 +32,7 @@ function App() {
       setItems((items) => items.filter(item => item !== active.id));
       setDroppedItems((items) => [
         ...items, 
-        { id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`, content: active.id }
+        { id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`, content: active.id, isImage: active.id === 'Image' }
       ]);
     }
   }
@@ -42,15 +47,33 @@ function App() {
   }
 
   function handleDuplicate(id) {
-    // Find the item to duplicate
     const itemToDuplicate = droppedItems.find(item => item.id === id);
     if (itemToDuplicate) {
-      // Duplicate the item
       setDroppedItems((currentItems) => [
         ...currentItems,
-        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content }
+        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content, isImage: itemToDuplicate.isImage }
       ]);
     }
+  }
+
+  function handleAlign(align) {
+    setAlignment(align);
+  }
+
+  function handlePaddingChange(newPadding) {
+    setPadding(newPadding);
+  }
+
+  function handleColorChange(newColor) {
+    setColor(newColor);
+  }
+
+  function handleFontSizeChange(newFontSize) {
+    setFontSize(newFontSize);
+  }
+
+  function handleBackgroundColorChange(newColor) {
+    setBackgroundColor(newColor);
   }
 
   return (
@@ -69,21 +92,30 @@ function App() {
             </Draggable>
           ))}
         </Sidebar>
-        <Middlebar>
-          {droppedItems.map(({ id, content }) => (
+        <Middlebar alignment={alignment} padding={padding} color={color} fontSize={fontSize} backgroundColor={backgroundColor}>
+          {droppedItems.map(({ id, content, isImage }) => (
             <Draggable 
               key={id} 
-              id={id} 
+              id={content} 
               inMiddleBar={true} 
               onDelete={() => handleDelete(id)} 
               onEdit={handleEdit}
-              onDuplicate={() => handleDuplicate(id)} // Pass handleDuplicate function
+              onDuplicate={() => handleDuplicate(id)} 
+              isImage={isImage}
+              color={color}
+              fontSize={fontSize}
             >
               {content}
             </Draggable>
           ))}
         </Middlebar>
-        <Leftbar />
+        <Leftbar 
+          onAlign={handleAlign} 
+          onPaddingChange={handlePaddingChange} 
+          onColorChange={handleColorChange} 
+          onFontSizeChange={handleFontSizeChange} 
+          onBackgroundColorChange={handleBackgroundColorChange} 
+        />
       </div>
     </DndContext>
   );
