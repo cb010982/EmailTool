@@ -58,6 +58,10 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
     }
   }, [isEditing]);
 
+  useEffect(() => {
+    setEditContent(children);
+  }, [children]);
+
   return (
     <div 
       ref={setNodeRef} 

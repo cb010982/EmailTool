@@ -38,21 +38,26 @@ function App() {
   }
 
   function handleDelete(id) {
-    console.log('Deleting item with id:', id);
-    setDroppedItems((currentItems) => currentItems.filter(item => item.id !== id));
+    const updatedItems = droppedItems.filter(item => item.id !== id);
+    setDroppedItems(updatedItems);
+    localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
   }
 
   function handleEdit(id, newContent) {
-    setDroppedItems((currentItems) => currentItems.map(item => item.id === id ? { ...item, content: newContent } : item));
+    const updatedItems = droppedItems.map(item => item.id === id ? { ...item, content: newContent } : item);
+    setDroppedItems(updatedItems);
+    localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
   }
 
   function handleDuplicate(id) {
     const itemToDuplicate = droppedItems.find(item => item.id === id);
     if (itemToDuplicate) {
-      setDroppedItems((currentItems) => [
-        ...currentItems,
+      const updatedItems = [
+        ...droppedItems,
         { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content, isImage: itemToDuplicate.isImage }
-      ]);
+      ];
+      setDroppedItems(updatedItems);
+      localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
     }
   }
 
@@ -96,7 +101,7 @@ function App() {
           {droppedItems.map(({ id, content, isImage }) => (
             <Draggable 
               key={id} 
-              id={content} 
+              id={id} 
               inMiddleBar={true} 
               onDelete={() => handleDelete(id)} 
               onEdit={handleEdit}
