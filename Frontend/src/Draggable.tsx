@@ -12,12 +12,14 @@ interface IDraggable {
   isImage?: boolean;
   color?: string;
   fontSize?: number;
+  backgroundColor?: string;
 }
 
-const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit, isImage, color, fontSize }) => {
+const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, onDuplicate, onEdit, isImage, color, fontSize, backgroundColor }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(children);
+  const [imageSrc, setImageSrc] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEditClick = (e: React.MouseEvent) => {
@@ -39,6 +41,17 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
     e.stopPropagation();
   };
 
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        setImageSrc(event.target?.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   useEffect(() => {
     if (isEditing && inputRef.current) {
       inputRef.current.focus();
@@ -51,7 +64,7 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
       style={{ 
         padding: '10px', 
         border: '1px solid #ccc', 
-        background: 'white', 
+        background: backgroundColor || 'white', 
         display: 'flex', 
         alignItems: 'center', 
         justifyContent: 'space-between', 
@@ -70,7 +83,20 @@ const Draggable: React.FC<IDraggable> = ({ id, children, inMiddleBar, onDelete, 
             onClick={handleTextClick} 
           />
         ) : (
-          isImage ? <img src={children as string} alt="Dropped Image" style={{ maxWidth: '100%' }} /> : <span onClick={handleTextClick}>{children}</span>
+          isImage ? (
+            <>
+              {imageSrc ? (
+                <img src={imageSrc} alt="Dropped" style={{ maxWidth: '100%' }} />
+              ) : (
+                <div>
+                  <p>Select Image</p>
+                  <input type="file" accept="image/*" onChange={handleImageChange} />
+                </div>
+              )}
+            </>
+          ) : (
+            <span onClick={handleTextClick}>{children}</span>
+          )
         )}
       </div>
       {inMiddleBar && (

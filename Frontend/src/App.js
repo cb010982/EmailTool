@@ -15,7 +15,7 @@ function App() {
   const [padding, setPadding] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
   const [color, setColor] = useState('#000000');
   const [fontSize, setFontSize] = useState(16);
-  const [backgroundColor, setBackgroundColor] = useState('#FFFFFF');
+  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -72,8 +72,8 @@ function App() {
     setFontSize(newFontSize);
   }
 
-  function handleBackgroundColorChange(newColor) {
-    setBackgroundColor(newColor);
+  function handleBackgroundColorChange(newBackgroundColor) {
+    setBackgroundColor(newBackgroundColor);
   }
 
   return (
@@ -104,18 +104,13 @@ function App() {
               isImage={isImage}
               color={color}
               fontSize={fontSize}
+              backgroundColor={backgroundColor}
             >
               {content}
             </Draggable>
           ))}
         </Middlebar>
-        <Leftbar 
-          onAlign={handleAlign} 
-          onPaddingChange={handlePaddingChange} 
-          onColorChange={handleColorChange} 
-          onFontSizeChange={handleFontSizeChange} 
-          onBackgroundColorChange={handleBackgroundColorChange} 
-        />
+        <Leftbar onAlign={handleAlign} onPaddingChange={handlePaddingChange} onColorChange={handleColorChange} onFontSizeChange={handleFontSizeChange} onBackgroundColorChange={handleBackgroundColorChange} />
       </div>
     </DndContext>
   );

@@ -10,7 +10,7 @@ const Sidebar = () => {
       <Draggable id="Text">
         <div>Text</div>
       </Draggable>
-      <Draggable id="Image" isImage>
+      <Draggable id="Image">
         <div>Image</div>
       </Draggable>
     </div>
