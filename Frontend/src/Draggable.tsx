@@ -100,7 +100,6 @@ const Draggable: React.FC<DraggableProps> = ({
           color: color,
           fontSize: `${fontSize}px`,
           textAlign: alignment,
-          padding: `${padding?.top ?? 0}px ${padding?.right ?? 0}px ${padding?.bottom ?? 0}px ${padding?.left ?? 0}px`,
         }}
       >
         {isEditing ? (
