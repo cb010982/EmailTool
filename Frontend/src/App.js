@@ -1,5 +1,3 @@
-// App.tsx
-
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import Draggable from './Draggable.tsx';
@@ -37,6 +35,7 @@ function App() {
           color: '#000000',
           fontSize: 16,
           backgroundColor: '#ffffff',
+          alignment: 'left', // Default alignment
           padding: { left: 0, right: 0, top: 0, bottom: 0 }, // Initialize padding here
         }
       ]);
@@ -68,6 +67,7 @@ function App() {
           color: itemToDuplicate.color,
           fontSize: itemToDuplicate.fontSize,
           backgroundColor: itemToDuplicate.backgroundColor,
+          alignment: itemToDuplicate.alignment,
           padding: { ...itemToDuplicate.padding }, // Ensure padding is duplicated as well
         }
       ];
@@ -85,21 +85,9 @@ function App() {
   return (
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
       <div style={{ display: 'flex' }}>
-        <Sidebar>
-          {items.map(id => (
-            <Draggable
-              key={id}
-              id={id}
-              inMiddleBar={false}
-              onDelete={() => handleDelete(id)}
-              onEdit={handleEdit}
-            >
-              {id}
-            </Draggable>
-          ))}
-        </Sidebar>
+        <Sidebar />
         <Middlebar>
-          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, padding }) => (
+          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, alignment, padding }) => (
             <Draggable
               key={id}
               id={id}
@@ -110,6 +98,7 @@ function App() {
               color={color}
               fontSize={fontSize}
               backgroundColor={backgroundColor}
+              alignment={alignment}
               padding={padding}
               onSelectForStyle={() => setSelectedItemId(id)}
             >
@@ -119,8 +108,8 @@ function App() {
         </Middlebar>
         {selectedItemId && (
           <Leftbar
-            onAlign={(align) => handleItemStyleChange(selectedItemId, { textAlign: align })}
-            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: { left: newPadding, right: newPadding, top: newPadding, bottom: newPadding } })}
+            onAlign={(align) => handleItemStyleChange(selectedItemId, { alignment: align })}
+            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: { ...newPadding } })}
             onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
             onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
             onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}

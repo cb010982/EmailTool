@@ -18,7 +18,7 @@ const Leftbar = ({
   });
 
   const handlePaddingChange = (position, value) => {
-    onPaddingChange({ position, value });
+    onPaddingChange({ [position]: value });
   };
 
   const handleTextStyleChange = (style) => {

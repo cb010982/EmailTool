@@ -12,7 +12,7 @@ interface DraggableProps {
   color?: string;
   fontSize?: number;
   backgroundColor?: string;
-  alignment?: string;
+  alignment?: 'left' | 'center' | 'right';
   padding?: { left: number; right: number; top: number; bottom: number };
   onSelectForStyle?: (id: string) => void;
 }
@@ -99,7 +99,7 @@ const Draggable: React.FC<DraggableProps> = ({
           cursor: 'grab',
           color: color,
           fontSize: `${fontSize}px`,
-          textAlign: alignment as 'left' | 'center' | 'right',
+          textAlign: alignment,
           padding: `${padding?.top ?? 0}px ${padding?.right ?? 0}px ${padding?.bottom ?? 0}px ${padding?.left ?? 0}px`,
         }}
       >
