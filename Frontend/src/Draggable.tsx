@@ -8,11 +8,12 @@ interface DraggableProps {
   inMiddleBar: boolean;
   onDelete: () => void;
   onDuplicate: () => void;
-  onEdit: (id: string, newContent: string) => void;
-  isImage?: boolean;
+  onEdit: (id: string, newContent: any) => void;
   color?: string;
   fontSize?: number;
   backgroundColor?: string;
+  alignment?: string;
+  padding?: { left: number; right: number; top: number; bottom: number };
   onSelectForStyle?: (id: string) => void;
 }
 
@@ -23,10 +24,11 @@ const Draggable: React.FC<DraggableProps> = ({
   onDelete,
   onDuplicate,
   onEdit,
-  isImage,
   color,
   fontSize,
   backgroundColor,
+  alignment,
+  padding,
   onSelectForStyle,
 }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
@@ -81,17 +83,26 @@ const Draggable: React.FC<DraggableProps> = ({
     <div
       ref={setNodeRef}
       style={{
-        padding: '10px',
+        padding: `${padding?.top ?? 0}px ${padding?.right ?? 0}px ${padding?.bottom ?? 0}px ${padding?.left ?? 0}px`,
         border: '1px solid #ccc',
         background: backgroundColor || 'white',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        color: color,
-        fontSize: `${fontSize}px`,
       }}
     >
-      <div {...listeners} {...attributes} style={{ flexGrow: 1, cursor: 'grab' }}>
+      <div
+        {...listeners}
+        {...attributes}
+        style={{
+          flexGrow: 1,
+          cursor: 'grab',
+          color: color,
+          fontSize: `${fontSize}px`,
+          textAlign: alignment as 'left' | 'center' | 'right',
+          padding: `${padding?.top ?? 0}px ${padding?.right ?? 0}px ${padding?.bottom ?? 0}px ${padding?.left ?? 0}px`,
+        }}
+      >
         {isEditing ? (
           <input
             ref={inputRef}
@@ -100,18 +111,12 @@ const Draggable: React.FC<DraggableProps> = ({
             onChange={(e) => setEditContent(e.target.value)}
             onBlur={handleSaveClick}
             onClick={handleTextClick}
+            style={{
+              color: color,
+              fontSize: `${fontSize}px`,
+              background: backgroundColor || 'white',
+            }}
           />
-        ) : isImage ? (
-          <>
-            {imageSrc ? (
-              <img src={imageSrc} alt="Dropped" style={{ maxWidth: '100%' }} />
-            ) : (
-              <div>
-                <p>Select Image</p>
-                <input type="file" accept="image/*" onChange={handleImageChange} />
-              </div>
-            )}
-          </>
         ) : (
           <span onClick={handleTextClick}>{children}</span>
         )}

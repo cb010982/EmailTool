@@ -1,9 +1,11 @@
+// App.tsx
+
 import React, { useState, useEffect } from 'react';
 import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import Draggable from './Draggable.tsx';
 import Middlebar from './Middlebar';
-import Sidebar from './Rightbar'; 
-import Leftbar from './Leftbar'; 
+import Sidebar from './Rightbar';
+import Leftbar from './Leftbar';
 
 function App() {
   const [items, setItems] = useState(['Heading', 'Text', 'Image']);
@@ -27,8 +29,16 @@ function App() {
     if (over && active.id !== over.id) {
       setItems((items) => items.filter(item => item !== active.id));
       setDroppedItems((items) => [
-        ...items, 
-        { id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`, content: active.id, isImage: active.id === 'Image', color: '#000000', fontSize: 16, backgroundColor: '#ffffff' }
+        ...items,
+        {
+          id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`,
+          content: active.id,
+          isImage: active.id === 'Image',
+          color: '#000000',
+          fontSize: 16,
+          backgroundColor: '#ffffff',
+          padding: { left: 0, right: 0, top: 0, bottom: 0 }, // Initialize padding here
+        }
       ]);
     }
   }
@@ -51,7 +61,15 @@ function App() {
     if (itemToDuplicate) {
       const updatedItems = [
         ...droppedItems,
-        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content, isImage: itemToDuplicate.isImage, color: itemToDuplicate.color, fontSize: itemToDuplicate.fontSize, backgroundColor: itemToDuplicate.backgroundColor }
+        {
+          id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`,
+          content: itemToDuplicate.content,
+          isImage: itemToDuplicate.isImage,
+          color: itemToDuplicate.color,
+          fontSize: itemToDuplicate.fontSize,
+          backgroundColor: itemToDuplicate.backgroundColor,
+          padding: { ...itemToDuplicate.padding }, // Ensure padding is duplicated as well
+        }
       ];
       setDroppedItems(updatedItems);
       localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
@@ -69,30 +87,30 @@ function App() {
       <div style={{ display: 'flex' }}>
         <Sidebar>
           {items.map(id => (
-            <Draggable 
-              key={id} 
-              id={id} 
-              inMiddleBar={false} 
-              onDelete={() => handleDelete(id)} 
-              onEdit={handleEdit} 
+            <Draggable
+              key={id}
+              id={id}
+              inMiddleBar={false}
+              onDelete={() => handleDelete(id)}
+              onEdit={handleEdit}
             >
               {id}
             </Draggable>
           ))}
         </Sidebar>
         <Middlebar>
-          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor }) => (
-            <Draggable 
-              key={id} 
-              id={id} 
-              inMiddleBar={true} 
-              onDelete={() => handleDelete(id)} 
+          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, padding }) => (
+            <Draggable
+              key={id}
+              id={id}
+              inMiddleBar={true}
+              onDelete={() => handleDelete(id)}
               onEdit={handleEdit}
-              onDuplicate={() => handleDuplicate(id)} 
-              isImage={isImage}
+              onDuplicate={() => handleDuplicate(id)}
               color={color}
               fontSize={fontSize}
               backgroundColor={backgroundColor}
+              padding={padding}
               onSelectForStyle={() => setSelectedItemId(id)}
             >
               {content}
@@ -100,9 +118,9 @@ function App() {
           ))}
         </Middlebar>
         {selectedItemId && (
-          <Leftbar 
+          <Leftbar
             onAlign={(align) => handleItemStyleChange(selectedItemId, { textAlign: align })}
-            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: newPadding })}
+            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: { left: newPadding, right: newPadding, top: newPadding, bottom: newPadding } })}
             onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
             onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
             onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}
