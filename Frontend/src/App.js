@@ -11,11 +11,7 @@ function App() {
     const savedDroppedItems = localStorage.getItem('droppedItems');
     return savedDroppedItems ? JSON.parse(savedDroppedItems) : [];
   });
-  const [alignment, setAlignment] = useState('left');
-  const [padding, setPadding] = useState({ left: 0, right: 0, top: 0, bottom: 0 });
-  const [color, setColor] = useState('#000000');
-  const [fontSize, setFontSize] = useState(16);
-  const [backgroundColor, setBackgroundColor] = useState('#ffffff');
+  const [selectedItemId, setSelectedItemId] = useState(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -32,7 +28,7 @@ function App() {
       setItems((items) => items.filter(item => item !== active.id));
       setDroppedItems((items) => [
         ...items, 
-        { id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`, content: active.id, isImage: active.id === 'Image' }
+        { id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`, content: active.id, isImage: active.id === 'Image', color: '#000000', fontSize: 16, backgroundColor: '#ffffff' }
       ]);
     }
   }
@@ -41,6 +37,7 @@ function App() {
     const updatedItems = droppedItems.filter(item => item.id !== id);
     setDroppedItems(updatedItems);
     localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
+    if (selectedItemId === id) setSelectedItemId(null);
   }
 
   function handleEdit(id, newContent) {
@@ -54,31 +51,17 @@ function App() {
     if (itemToDuplicate) {
       const updatedItems = [
         ...droppedItems,
-        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content, isImage: itemToDuplicate.isImage }
+        { id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`, content: itemToDuplicate.content, isImage: itemToDuplicate.isImage, color: itemToDuplicate.color, fontSize: itemToDuplicate.fontSize, backgroundColor: itemToDuplicate.backgroundColor }
       ];
       setDroppedItems(updatedItems);
       localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
     }
   }
 
-  function handleAlign(align) {
-    setAlignment(align);
-  }
-
-  function handlePaddingChange(newPadding) {
-    setPadding(newPadding);
-  }
-
-  function handleColorChange(newColor) {
-    setColor(newColor);
-  }
-
-  function handleFontSizeChange(newFontSize) {
-    setFontSize(newFontSize);
-  }
-
-  function handleBackgroundColorChange(newBackgroundColor) {
-    setBackgroundColor(newBackgroundColor);
+  function handleItemStyleChange(id, styleChanges) {
+    const updatedItems = droppedItems.map(item => item.id === id ? { ...item, ...styleChanges } : item);
+    setDroppedItems(updatedItems);
+    localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
   }
 
   return (
@@ -97,8 +80,8 @@ function App() {
             </Draggable>
           ))}
         </Sidebar>
-        <Middlebar alignment={alignment} padding={padding} color={color} fontSize={fontSize} backgroundColor={backgroundColor}>
-          {droppedItems.map(({ id, content, isImage }) => (
+        <Middlebar>
+          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor }) => (
             <Draggable 
               key={id} 
               id={id} 
@@ -110,12 +93,21 @@ function App() {
               color={color}
               fontSize={fontSize}
               backgroundColor={backgroundColor}
+              onSelectForStyle={() => setSelectedItemId(id)}
             >
               {content}
             </Draggable>
           ))}
         </Middlebar>
-        <Leftbar onAlign={handleAlign} onPaddingChange={handlePaddingChange} onColorChange={handleColorChange} onFontSizeChange={handleFontSizeChange} onBackgroundColorChange={handleBackgroundColorChange} />
+        {selectedItemId && (
+          <Leftbar 
+            onAlign={(align) => handleItemStyleChange(selectedItemId, { textAlign: align })}
+            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: newPadding })}
+            onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
+            onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
+            onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}
+          />
+        )}
       </div>
     </DndContext>
   );
