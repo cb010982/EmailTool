@@ -15,6 +15,13 @@ interface DraggableProps {
   alignment?: 'left' | 'center' | 'right';
   padding?: { left: number; right: number; top: number; bottom: number };
   onSelectForStyle?: (id: string) => void;
+  textStyle?: {
+    bold: boolean;
+    italic: boolean;
+    underline: boolean;
+    strikeThrough: boolean;
+    highlight: boolean;
+  };
 }
 
 const Draggable: React.FC<DraggableProps> = ({
@@ -30,6 +37,7 @@ const Draggable: React.FC<DraggableProps> = ({
   alignment,
   padding,
   onSelectForStyle,
+  textStyle,
 }) => {
   const { attributes, listeners, setNodeRef } = useDraggable({ id });
   const [isEditing, setIsEditing] = useState(false);
@@ -63,6 +71,9 @@ const Draggable: React.FC<DraggableProps> = ({
       reader.onload = (event) => {
         if (event.target?.result) {
           setImageSrc(event.target.result as string);
+          if (onEdit) {
+            onEdit(id, event.target.result as string);
+          }
         }
       };
       reader.readAsDataURL(file);
@@ -78,6 +89,18 @@ const Draggable: React.FC<DraggableProps> = ({
   useEffect(() => {
     setEditContent(children);
   }, [children]);
+
+  const textStyles = {
+    fontWeight: textStyle?.bold ? 'bold' : 'normal',
+    fontStyle: textStyle?.italic ? 'italic' : 'normal',
+    textDecoration: [
+      textStyle?.underline && 'underline',
+      textStyle?.strikeThrough && 'line-through',
+      textStyle?.highlight && 'background: yellow;', // example of highlighting, might need adjustment based on implementation
+    ]
+      .filter(Boolean)
+      .join(' '),
+  };
 
   return (
     <div
@@ -100,6 +123,8 @@ const Draggable: React.FC<DraggableProps> = ({
           color: color,
           fontSize: `${fontSize}px`,
           textAlign: alignment,
+          padding: `${padding?.top ?? 0}px ${padding?.right ?? 0}px ${padding?.bottom ?? 0}px ${padding?.left ?? 0}px`,
+          ...textStyles,
         }}
       >
         {isEditing ? (
@@ -117,7 +142,33 @@ const Draggable: React.FC<DraggableProps> = ({
             }}
           />
         ) : (
-          <span onClick={handleTextClick}>{children}</span>
+          children === 'Button' ? (
+            <button
+              style={{
+                backgroundColor: backgroundColor || '#007bff',
+                color: color || '#ffffff',
+                padding: '10px 20px',
+                border: '1px solid transparent',
+                borderRadius: '4px',
+                cursor: 'pointer',
+                fontSize: `${fontSize}px`,
+                textAlign: alignment,
+                transition: 'background-color 0.3s, box-shadow 0.3s',
+                boxShadow: '0px 2px 4px rgba(0, 0, 0, 0.1)',
+              }}
+              onClick={handleTextClick} // Optional: Add a real onClick event for button functionality
+            >
+              {editContent}
+            </button>
+          ) : (
+            children === 'Image' && !imageSrc ? (
+              <input type="file" onChange={handleImageChange} />
+            ) : (
+              <span onClick={handleTextClick} style={textStyles}>
+                {imageSrc ? <img src={imageSrc} alt="Uploaded" style={{ maxWidth: '100%' }} /> : editContent}
+              </span>
+            )
+          )
         )}
       </div>
       {inMiddleBar && (
