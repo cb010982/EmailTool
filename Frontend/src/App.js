@@ -1,9 +1,10 @@
+// App.js
 import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from '@dnd-kit/core';
-import Sidebar from './Rightbar';  // Ensure these components are correctly imported
-import Middlebar from './Middlebar';  // Ensure these components are correctly imported
-import Draggable from './Draggable.tsx';  // Ensure these components are correctly imported
-import Leftbar from './Leftbar';  // Ensure these components are correctly imported
+import Sidebar from './Rightbar';
+import Middlebar from './Middlebar';
+import Draggable from './Draggable.tsx';
+import Leftbar from './Leftbar';
 
 function App() {
   const [items, setItems] = useState(['Heading', 'Text', 'Image']);
@@ -35,8 +36,9 @@ function App() {
           color: '#000000',
           fontSize: 16,
           backgroundColor: '#ffffff',
-          alignment: 'left', // Default alignment
-          padding: { left: 0, right: 0, top: 0, bottom: 0 }, // Initialize padding here
+          buttonBackgroundColor: '#007bff', // Default button background color
+          alignment: 'left',
+          padding: { left: 0, right: 0, top: 0, bottom: 0 },
           textStyle: {
             bold: false,
             italic: false,
@@ -74,6 +76,7 @@ function App() {
           color: itemToDuplicate.color,
           fontSize: itemToDuplicate.fontSize,
           backgroundColor: itemToDuplicate.backgroundColor,
+          buttonBackgroundColor: itemToDuplicate.buttonBackgroundColor, // Add this line
           alignment: itemToDuplicate.alignment,
           padding: { ...itemToDuplicate.padding },
           textStyle: { ...itemToDuplicate.textStyle },
@@ -101,7 +104,7 @@ function App() {
       <div style={{ display: 'flex' }}>
         <Sidebar />
         <Middlebar>
-          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, alignment, padding, textStyle }) => (
+          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle }) => (
             <Draggable
               key={id}
               id={id}
@@ -112,6 +115,7 @@ function App() {
               color={color}
               fontSize={fontSize}
               backgroundColor={backgroundColor}
+              buttonBackgroundColor={buttonBackgroundColor} // Pass buttonBackgroundColor here
               alignment={alignment}
               padding={padding}
               textStyle={textStyle}
@@ -128,6 +132,7 @@ function App() {
             onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
             onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
             onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}
+            onButtonBackgroundColorChange={(newButtonBackgroundColor) => handleItemStyleChange(selectedItemId, { buttonBackgroundColor: newButtonBackgroundColor })} // Allow change of button background color
             onTextStyleChange={(newTextStyle) => handleTextStyleChange(selectedItemId, newTextStyle)}
           />
         )}
