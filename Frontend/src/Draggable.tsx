@@ -139,6 +139,8 @@ const Draggable = ({
           </button>
         ) : children === 'Image' && !imageSrc ? (
           <input type="file" onChange={handleImageChange} />
+        ) : children === 'Divider' ? (
+          <hr style={{ width: '100%', border: '1px solid #ccc' }} />
         ) : (
           <span onClick={handleTextClick} style={textStyles}>
             {imageSrc ? <img src={imageSrc} alt="Uploaded" style={{ maxWidth: '100%' }} /> : editContent}
