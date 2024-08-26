@@ -74,12 +74,18 @@ const Sidebar = () => {
       <div>
         <h3 style={{ cursor: 'pointer' }} onClick={() => toggleSection('sections')}>Section Blocks</h3>
         {sectionsOpen && (
-          <div style={{ marginBottom: '15px' }}>
-            <Draggable id="FullWidthSection"><div style={sectionStyle}>Full Width Section</div></Draggable>
-            <Draggable id="TwoColumnSection"><div style={sectionStyle}>Two Column Section</div></Draggable>
-            <Draggable id="ThreeColumnSection"><div style={sectionStyle}>Three Column Section</div></Draggable>
-          </div>
-        )}
+            <div style={{ marginBottom: '15px' }}>
+              <Draggable id="FullWidthSection">
+                <div style={sectionStyle}>Full Width Section</div>
+              </Draggable>
+              <Draggable id="TwoColumnSection">
+                <div style={sectionStyle}>Two Column Section</div>
+              </Draggable>
+              <Draggable id="ThreeColumnSection">
+                <div style={sectionStyle}>Three Column Section</div>
+              </Draggable>
+            </div>
+          )}
       </div>
     </div>
   );

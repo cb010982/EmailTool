@@ -1,28 +1,25 @@
-const express = require("express");
-const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const dotenv = require("dotenv");
+const express = require('express');
+const { exec } = require('child_process');
+const bodyParser = require('body-parser');
+
 const app = express();
-require("dotenv").config();
+app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-const PORT = process.env.PORT || 8070;
+app.post('/send-test-email', (req, res) => {
+    const htmlContent = req.body.htmlContent; // Get HTML content from the request
 
-app.use(cors());
-app.use(bodyParser.json());
-
-const URL = process.env.MONGODB_URL;
-
-mongoose.connect(URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+    exec(`python send_emails.py "${htmlContent.replace(/"/g, '\\"')}"`, (error, stdout, stderr) => {
+        if (error) {
+            console.error(`Error: ${error.message}`);
+            return res.status(500).send({ status: 'error', message: 'Failed to send email.', error: error.message });
+        }
+        if (stderr) {
+            console.error(`stderr: ${stderr}`);
+            return res.status(500).send({ status: 'error', message: 'Failed to send email.', error: stderr });
+        }
+        console.log(`stdout: ${stdout}`);
+        return res.status(200).send({ status: 'success', message: 'Email sent successfully!' });
+    });
 });
 
-const connection = mongoose.connection;
-connection.once("open", () => {
-    console.log("Mongodb Connection success!");
-});
-
-app.listen(PORT, () => {
-    console.log(`Server is up and running on port ${PORT}`);
-});

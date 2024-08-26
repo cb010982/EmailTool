@@ -22,6 +22,7 @@ const Draggable = ({
   const [isEditing, setIsEditing] = useState(false);
   const [editContent, setEditContent] = useState(children);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
+  const [videoSrc, setVideoSrc] = useState<string | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleEditClick = (e) => {
@@ -56,6 +57,17 @@ const Draggable = ({
         }
       };
       reader.readAsDataURL(file);
+    }
+  };
+
+  const handleVideoChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const videoUrl = URL.createObjectURL(file);
+      setVideoSrc(videoUrl);
+      if (onEdit) {
+        onEdit(id, videoUrl); // Here, you would typically send the file to a server and save the URL
+      }
     }
   };
 
@@ -139,11 +151,22 @@ const Draggable = ({
           </button>
         ) : children === 'Image' && !imageSrc ? (
           <input type="file" onChange={handleImageChange} />
+        ) : children === 'Video' && !videoSrc ? (
+          <input type="file" accept="video/*" onChange={handleVideoChange} />
         ) : children === 'Divider' ? (
           <hr style={{ width: '100%', border: '1px solid #ccc' }} />
         ) : (
           <span onClick={handleTextClick} style={textStyles}>
-            {imageSrc ? <img src={imageSrc} alt="Uploaded" style={{ maxWidth: '100%' }} /> : editContent}
+            {videoSrc ? (
+              <video controls style={{ maxWidth: '100%' }}>
+                <source src={videoSrc} type="video/mp4" />
+                Your browser does not support the video tag.
+              </video>
+            ) : imageSrc ? (
+              <img src={imageSrc} alt="Uploaded" style={{ maxWidth: '100%' }} />
+            ) : (
+              editContent
+            )}
           </span>
         )}
       </div>

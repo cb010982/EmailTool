@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from '@dnd-kit/core';
-import Sidebar from './Rightbar.js';
+import Sidebar from './Rightbar';
 import Middlebar from './Middlebar';
 import Draggable from './Draggable.tsx';
 import Leftbar from './Leftbar';
@@ -18,7 +18,22 @@ function App() {
     useSensor(PointerSensor),
     useSensor(KeyboardSensor)
   );
-
+  const sendEmail = async () => {
+    const htmlContent = generateHTML();
+    try {
+      const response = await axios.post('http://localhost:5000/send-emails', {
+        htmlContent: htmlContent
+      });
+      if (response.data.status === 'success') {
+        alert('Emails sent successfully!');
+      } else {
+        alert('Failed to send emails.');
+      }
+    } catch (error) {
+      console.error('Error sending emails:', error);
+      alert('An error occurred while sending emails.');
+    }
+  };
   useEffect(() => {
     localStorage.setItem('droppedItems', JSON.stringify(droppedItems));
   }, [droppedItems]);
@@ -33,10 +48,11 @@ function App() {
           id: `${active.id}-${Math.random().toString(36).substr(2, 9)}`,
           content: active.id,
           isImage: active.id === 'Image',
+          isVideo: active.id === 'Video',
           color: '#000000',
           fontSize: 16,
           backgroundColor: '#ffffff',
-          buttonBackgroundColor: '#007bff',
+          buttonBackgroundColor: '#007bff', // Default button background color
           alignment: 'left',
           padding: { left: 0, right: 0, top: 0, bottom: 0 },
           textStyle: {
@@ -73,10 +89,11 @@ function App() {
           id: `${itemToDuplicate.id}-${Math.random().toString(36).substr(2, 9)}`,
           content: itemToDuplicate.content,
           isImage: itemToDuplicate.isImage,
+          isVideo: itemToDuplicate.isVideo,
           color: itemToDuplicate.color,
           fontSize: itemToDuplicate.fontSize,
           backgroundColor: itemToDuplicate.backgroundColor,
-          buttonBackgroundColor: itemToDuplicate.buttonBackgroundColor,
+          buttonBackgroundColor: itemToDuplicate.buttonBackgroundColor, // Add this line
           alignment: itemToDuplicate.alignment,
           padding: { ...itemToDuplicate.padding },
           textStyle: { ...itemToDuplicate.textStyle },
@@ -102,44 +119,47 @@ function App() {
   // Convert droppedItems to HTML
   function generateHTML() {
     return droppedItems.map(item => {
+      let contentHTML = '';
+      const { content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle } = item;
+
       const style = `
-        color: ${item.color};
-        font-size: ${item.fontSize}px;
-        background-color: ${item.backgroundColor};
-        text-align: ${item.alignment};
-        padding: ${item.padding.top}px ${item.padding.right}px ${item.padding.bottom}px ${item.padding.left}px;
-        ${item.textStyle.bold ? 'font-weight: bold;' : ''}
-        ${item.textStyle.italic ? 'font-style: italic;' : ''}
-        ${item.textStyle.underline ? 'text-decoration: underline;' : ''}
-        ${item.textStyle.strikeThrough ? 'text-decoration: line-through;' : ''}
+        color: ${color};
+        font-size: ${fontSize}px;
+        background-color: ${backgroundColor};
+        text-align: ${alignment};
+        padding: ${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px;
+        font-weight: ${textStyle.bold ? 'bold' : 'normal'};
+        font-style: ${textStyle.italic ? 'italic' : 'normal'};
+        text-decoration: ${[
+          textStyle.underline && 'underline',
+          textStyle.strikeThrough && 'line-through',
+        ].filter(Boolean).join(' ')};
       `;
-      if (item.isImage) {
-        return `<div style="${style}"><img src="${item.content}" alt="Image" style="max-width: 100%;"></div>`;
-      } else if (item.content === 'Button') {
-        return `<div style="${style}"><button style="background-color: ${item.buttonBackgroundColor}; color: ${item.color}; padding: 10px 20px; border: none; border-radius: 5px;">${item.content}</button></div>`;
+
+      if (isImage) {
+        contentHTML = `<img src="${content}" alt="Image" style="max-width: 100%;" />`;
+      } else if (isVideo) {
+        contentHTML = `<video controls style="max-width: 100%;"><source src="${content}" type="video/mp4">Your browser does not support the video tag.</video>`;
+      } else if (content === 'Button') {
+        contentHTML = `<button style="background-color: ${buttonBackgroundColor}; color: ${color}; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">${content}</button>`;
       } else {
-        return `<div style="${style}">${item.content}</div>`;
+        contentHTML = `<div style="${style}">${content}</div>`;
       }
+
+      return contentHTML;
     }).join('');
   }
 
-  // Send the generated HTML via email
-  function sendEmail() {
+  // Save HTML content as a file
+  function saveHTML() {
     const htmlContent = generateHTML();
-    
-    axios.post('http://localhost:3001/send-email', {
-      to: 'senujidimansa@gmail.com', // Replace with the recipient's email
-      subject: 'Your EDM Subject', // Replace with the email subject
-      html: htmlContent,
-    })
-    .then(response => {
-      console.log('Email sent successfully:', response.data);
-      alert('Email sent successfully!');
-    })
-    .catch(error => {
-      console.error('Error sending email:', error);
-      alert('Failed to send email.');
-    });
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = 'email_template.html';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   }
 
   return (
@@ -147,7 +167,7 @@ function App() {
       <div style={{ display: 'flex' }}>
         <Sidebar />
         <Middlebar>
-          {droppedItems.map(({ id, content, isImage, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle }) => (
+          {droppedItems.map(({ id, content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle }) => (
             <Draggable
               key={id}
               id={id}
@@ -158,7 +178,7 @@ function App() {
               color={color}
               fontSize={fontSize}
               backgroundColor={backgroundColor}
-              buttonBackgroundColor={buttonBackgroundColor}
+              buttonBackgroundColor={buttonBackgroundColor} // Pass buttonBackgroundColor here
               alignment={alignment}
               padding={padding}
               textStyle={textStyle}
@@ -167,22 +187,6 @@ function App() {
               {content}
             </Draggable>
           ))}
-          <button
-            style={{
-              marginTop: '20px',
-              padding: '10px 20px',
-              borderRadius: '5px',
-              backgroundColor: '#007bff',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-              fontSize: '16px',
-              alignSelf: 'center',
-            }}
-            onClick={sendEmail}
-          >
-            Send as EDM
-          </button>
         </Middlebar>
         {selectedItemId && (
           <Leftbar
@@ -191,11 +195,17 @@ function App() {
             onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
             onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
             onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}
-            onButtonBackgroundColorChange={(newButtonBackgroundColor) => handleItemStyleChange(selectedItemId, { buttonBackgroundColor: newButtonBackgroundColor })}
+            onButtonBackgroundColorChange={(newButtonBackgroundColor) => handleItemStyleChange(selectedItemId, { buttonBackgroundColor: newButtonBackgroundColor })} // Allow change of button background color
             onTextStyleChange={(newTextStyle) => handleTextStyleChange(selectedItemId, newTextStyle)}
           />
         )}
       </div>
+      <button onClick={saveHTML} style={{ padding: '10px 20px', margin: '20px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>
+        Save as HTML
+      </button>
+      <button onClick={sendEmail} style={{ padding: '10px 20px', margin: '20px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>
+        Send Email
+      </button>
     </DndContext>
   );
 }
