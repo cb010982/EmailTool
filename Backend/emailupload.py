@@ -1,23 +1,22 @@
 import dash
-from dash import dcc, html, dash_table, Input, Output, State, ctx
+from dash import dcc, html, dash_table, Input, Output, State, MATCH, ALL
 import pandas as pd
 import io
 import base64
-import sqlite3
-import os
+from sqlalchemy import create_engine, Table, MetaData
 
-# Initialize the app
 app = dash.Dash(__name__)
 
-# Define relevant columns that match the database schema
-relevant_columns = [
-    'first_name', 'last_name', 'email', 'company_name', 'country', 
-    'job_title', 'mobile_phone', 'phone', 'linkedin_url', 
-    'industry', 'department', 'company_size'
+categories = [
+    "first_name", "last_name", "email", "phone", "mobile_phone", "country",
+    "company_name", "industry", "job_title", "linkedin_url", "company_size",
+    "department", "other"
 ]
 
-# Include "Other" as a category to ignore non-relevant columns
-categories = relevant_columns + ['Other']
+engine = create_engine('sqlite:///leads.db')
+metadata = MetaData()
+metadata.reflect(bind=engine)
+leads_table = metadata.tables['leads']
 
 app.layout = html.Div([
     html.H2("CSV File Uploader"),
@@ -42,8 +41,8 @@ app.layout = html.Div([
     ),
     
     html.Div(id='output-data-upload'),
-    html.Button('Submit', id='submit-button', n_clicks=0),
-    html.Div(id='submission-status')
+    html.Button('Save to Database', id='save-button', n_clicks=0),
+    html.Div(id='save-output'),
 ])
 
 def parse_contents(contents, filename):
@@ -53,10 +52,8 @@ def parse_contents(contents, filename):
         if 'csv' in filename:
             df = pd.read_csv(io.StringIO(decoded.decode('utf-8')))
         else:
-            print("Unsupported file format.")
             return None
     except Exception as e:
-        print(f"Error parsing file: {e}")
         return None
     
     return df
@@ -66,13 +63,14 @@ def parse_contents(contents, filename):
     [Input('upload-data', 'contents')],
     [State('upload-data', 'filename')]
 )
-def display_columns(contents, filename):
+def update_output(contents, filename):
     if contents is not None:
         df = parse_contents(contents, filename)
         if df is not None:
             columns = df.columns.tolist()
-            table_and_dropdowns = []
 
+            table_and_dropdowns = []
+            
             for col in columns:
                 column_div = html.Div([
                     html.H4(col),
@@ -83,12 +81,11 @@ def display_columns(contents, filename):
                         style_cell={'textAlign': 'left'}
                     ),
                     html.Div([
-                        html.Label(f"Map '{col}' to:"),
+                        html.Label(f"Categorize '{col}':"),
                         dcc.Dropdown(
-                            id=f'category-dropdown-{col}',
+                            id={'type': 'category-dropdown', 'index': col},
                             options=[{'label': cat, 'value': cat} for cat in categories],
-                            value='Other',  # Default value is 'Other'
-                            clearable=False
+                            value="other"  
                         ),
                     ], style={'width': '40%', 'display': 'inline-block', 'verticalAlign': 'top', 'marginLeft': '5%'})
                 ], style={'display': 'flex', 'marginBottom': '20px'})
@@ -100,82 +97,30 @@ def display_columns(contents, filename):
     return html.Div(['No file uploaded yet.'])
 
 @app.callback(
-    [Output({'type': 'category-dropdown', 'index': dash.dependencies.ALL}, 'options')],
-    [Input({'type': 'category-dropdown', 'index': dash.dependencies.ALL}, 'value')],
-    [State({'type': 'category-dropdown', 'index': dash.dependencies.ALL}, 'id')]
+    Output('save-output', 'children'),
+    Input('save-button', 'n_clicks'),
+    [State('upload-data', 'contents'), State('upload-data', 'filename')],
+    [State({'type': 'category-dropdown', 'index': ALL}, 'value')]
 )
-def update_dropdown_options(selected_values, ids):
-    # Disable options that have already been selected
-    selected_values = [val for val in selected_values if val != 'Other']
-    new_options = [
-        [
-            {'label': cat, 'value': cat, 'disabled': cat in selected_values} 
-            for cat in categories
-        ] for _ in ids
-    ]
-    return new_options
-@app.callback(
-    Output('submission-status', 'children'),
-    [Input('submit-button', 'n_clicks')],
-    [State('upload-data', 'contents'),
-     State('upload-data', 'filename')] +
-    [State({'type': 'category-dropdown', 'index': dash.dependencies.ALL}, 'value')]
-)
-def process_and_submit_data(n_clicks, contents, filename, selected_categories):
+def save_to_database(n_clicks, contents, filename, dropdown_values):
     if n_clicks > 0 and contents is not None:
         df = parse_contents(contents, filename)
         if df is not None:
-            # Make sure selected_categories align with the columns in the df
-            selected_categories = [cat.lower() for cat in selected_categories]
+            column_mapping = dict(zip(df.columns.tolist(), dropdown_values))
+            data_to_insert = {category: df[col] for col, category in column_mapping.items() if category in leads_table.c}
 
-            # Initialize an empty DataFrame to collect valid columns
-            filtered_df = pd.DataFrame()
+            mapped_df = pd.DataFrame(data_to_insert)
 
-            for i, category in enumerate(selected_categories):
-                if category in relevant_columns:
-                    filtered_df[category] = df.iloc[:, i]
+            with engine.connect() as conn:
+                mapped_df.to_sql('leads', con=conn, if_exists='append', index=False)
 
-            # Debugging: Output the DataFrame
-            print("Filtered DataFrame to be Inserted:")
-            print(filtered_df.head())
+            return f"Successfully saved {len(mapped_df)} records to the database."
 
-            # If the DataFrame is empty, there's an issue with the mappings
-            if filtered_df.empty:
-                print("Filtered DataFrame is empty after processing.")
-                return "Error: No valid data to insert after processing."
-
-            # Insert the data into the database
-            insert_into_db(filtered_df)
-
-            return "Data has been processed and inserted into the database."
-
-    return "No file uploaded yet or no submission made."
-
-def insert_into_db(df):
-    # Check if the database exists in the current directory
-    if not os.path.exists('leads.db'):
-        print("Database not found! Ensure 'leads.db' is in the current directory.")
-        return
-
-    # Connect to SQLite database
-    conn = sqlite3.connect('leads.db')
-    cursor = conn.cursor()
-
-    # Insert each row into the database, allowing for NULLs where data is missing
-    for _, row in df.iterrows():
-        try:
-            cursor.execute('''
-                INSERT INTO leads (first_name, last_name, email, company_name, country, job_title, 
-                mobile_phone, phone, linkedin_url, industry, department, company_size)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', tuple(row.get(col, None) for col in relevant_columns))
-        except Exception as e:
-            print(f"Error inserting row: {e}")
-    
-    conn.commit()
-    conn.close()
-
-    print("Data successfully inserted into the database.")
+    return ""
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
+
+
+
