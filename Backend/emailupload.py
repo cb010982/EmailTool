@@ -92,7 +92,7 @@ def update_output(contents, filename):
 
                 table_and_dropdowns.append(column_div)
 
-            return html.Div(table_and_dropdowns)
+            return html.Div(table_and_dropdowns)         
     
     return html.Div(['No file uploaded yet.'])
 
