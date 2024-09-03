@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { DndContext, useSensor, useSensors, PointerSensor, KeyboardSensor, closestCenter } from '@dnd-kit/core';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import Sidebar from './Rightbar';
 import Middlebar from './Middlebar';
 import Draggable from './Draggable.tsx';
 import Leftbar from './Leftbar';
 import axios from 'axios';
+import Campaigns from './Campaigns'; 
+import Subscribers from './Subscribers'; 
+
 
 function App() {
   const [items, setItems] = useState(['Heading', 'Text', 'Image']);
@@ -116,18 +120,31 @@ function App() {
     localStorage.setItem('droppedItems', JSON.stringify(updatedItems));
   }
 
-  // Convert droppedItems to HTML
   function generateHTML() {
-    return droppedItems.map(item => {
+    const content = droppedItems.map(item => {
       let contentHTML = '';
-      const { content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle } = item;
-
+      const { content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding = {}, textStyle = {} } = item;
+  
+      // Set default values if not provided
+      const textColor = color || '#000000';
+      const bgColor = backgroundColor || '#ffffff';
+      const btnBgColor = buttonBackgroundColor || '#007bff';
+      const txtAlignment = alignment || 'left';
+      const txtFontSize = fontSize || 16;
+      const txtPadding = {
+        top: padding.top !== undefined ? padding.top : 0,
+        right: padding.right !== undefined ? padding.right : 0,
+        bottom: padding.bottom !== undefined ? padding.bottom : 0,
+        left: padding.left !== undefined ? padding.left : 0
+      };
+  
+      // Construct style string
       const style = `
-        color: ${color};
-        font-size: ${fontSize}px;
-        background-color: ${backgroundColor};
-        text-align: ${alignment};
-        padding: ${padding.top}px ${padding.right}px ${padding.bottom}px ${padding.left}px;
+        color: ${textColor};
+        font-size: ${txtFontSize}px;
+        background-color: ${bgColor};
+        text-align: ${txtAlignment};
+        padding: ${txtPadding.top}px ${txtPadding.right}px ${txtPadding.bottom}px ${txtPadding.left}px;
         font-weight: ${textStyle.bold ? 'bold' : 'normal'};
         font-style: ${textStyle.italic ? 'italic' : 'normal'};
         text-decoration: ${[
@@ -135,79 +152,120 @@ function App() {
           textStyle.strikeThrough && 'line-through',
         ].filter(Boolean).join(' ')};
       `;
-
+  
+      // Generate HTML content with appropriate tags
       if (isImage) {
-        contentHTML = `<img src="${content}" alt="Image" style="max-width: 100%;" />`;
+        contentHTML = `<img src="${content}" alt="Image" style="max-width: 100%; height: auto; display: block; margin: 0 auto; ${style}" />`;
       } else if (isVideo) {
-        contentHTML = `<video controls style="max-width: 100%;"><source src="${content}" type="video/mp4">Your browser does not support the video tag.</video>`;
+        contentHTML = `<video controls style="max-width: 100%; ${style}"><source src="${content}" type="video/mp4">Your browser does not support the video tag.</video>`;
       } else if (content === 'Button') {
-        contentHTML = `<button style="background-color: ${buttonBackgroundColor}; color: ${color}; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">${content}</button>`;
+        contentHTML = `<a href="#" style="display: inline-block; padding: 10px 20px; background-color: ${btnBgColor}; color: ${textColor}; text-decoration: none; border-radius: 4px; text-align: center;">${content}</a>`;
+      } else if (content === 'Divider') {
+        contentHTML = `<hr style="width: 100%; border: 1px solid #ccc; ${style}" />`;
+      } else if (content.toLowerCase().includes('heading')) {
+        contentHTML = `<h1 style="${style}">${content}</h1>`;
       } else {
-        contentHTML = `<div style="${style}">${content}</div>`;
+        contentHTML = `<p style="${style}">${content}</p>`;
       }
-
+  
       return contentHTML;
     }).join('');
+  
+    // Wrap the content in a complete HTML structure
+    const htmlDocument = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EDM Template</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px;">
+          ${content}
+        </div>
+      </body>
+      </html>
+    `;
+  
+    return htmlDocument;
   }
+  
+  
 
-  // Save HTML content as a file
-  function saveHTML() {
-    const htmlContent = generateHTML();
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'email_template.html';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  function generateHTML() {
+    const content = droppedItems.map(item => {
+      let contentHTML = '';
+      const { content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding = {}, textStyle = {} } = item;
+  
+      // Set default values if not provided
+      const textColor = color || '#000000';
+      const bgColor = backgroundColor || '#ffffff';
+      const btnBgColor = buttonBackgroundColor || '#007bff';
+      const txtAlignment = alignment || 'left';
+      const txtFontSize = fontSize || 16;
+      const txtPadding = {
+        top: padding.top !== undefined ? padding.top : 0,
+        right: padding.right !== undefined ? padding.right : 0,
+        bottom: padding.bottom !== undefined ? padding.bottom : 0,
+        left: padding.left !== undefined ? padding.left : 0
+      };
+  
+      // Encode content to prevent encoding issues
+      const encodedContent = content.replace(/'/g, '&#39;').replace(/"/g, '&quot;');
+  
+      // Construct style string
+      const style = `
+        color: ${textColor};
+        font-size: ${txtFontSize}px;
+        background-color: ${bgColor};
+        text-align: ${txtAlignment};
+        padding: ${txtPadding.top}px ${txtPadding.right}px ${txtPadding.bottom}px ${txtPadding.left}px;
+        font-weight: ${textStyle.bold ? 'bold' : 'normal'};
+        font-style: ${textStyle.italic ? 'italic' : 'normal'};
+        text-decoration: ${[
+          textStyle.underline && 'underline',
+          textStyle.strikeThrough && 'line-through',
+        ].filter(Boolean).join(' ')};
+      `;
+  
+      // Generate HTML content with appropriate tags
+      if (isImage) {
+        contentHTML = `<img src="${encodedContent}" alt="Image" style="max-width: 100%; height: auto; display: block; margin: 0 auto; ${style}" />`;
+      } else if (isVideo) {
+        contentHTML = `<video controls style="max-width: 100%; ${style}"><source src="${encodedContent}" type="video/mp4">Your browser does not support the video tag.</video>`;
+      } else if (encodedContent === 'Button') {
+        contentHTML = `<a href="#" style="display: inline-block; padding: 10px 20px; background-color: ${btnBgColor}; color: ${textColor}; text-decoration: none; border-radius: 4px; text-align: center;">${encodedContent}</a>`;
+      } else if (encodedContent === 'Divider') {
+        contentHTML = `<hr style="width: 100%; border: 1px solid #ccc; ${style}" />`;
+      } else if (encodedContent.toLowerCase().includes('heading')) {
+        contentHTML = `<h1 style="${style}">${encodedContent}</h1>`;
+      } else {
+        contentHTML = `<p style="${style}">${encodedContent}</p>`;
+      }
+  
+      return contentHTML;
+    }).join('');
+  
+    // Wrap the content in a complete HTML structure
+    const htmlDocument = `
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>EDM Template</title>
+      </head>
+      <body style="margin: 0; padding: 0; font-family: Arial, sans-serif; background-color: #f4f4f4;">
+        <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; padding: 20px; border-radius: 5px;">
+          ${content}
+        </div>
+      </body>
+      </html>
+    `;
+  
+    return htmlDocument;
   }
-
-  return (
-    <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-      <div style={{ display: 'flex' }}>
-        <Sidebar />
-        <Middlebar>
-          {droppedItems.map(({ id, content, isImage, isVideo, color, fontSize, backgroundColor, buttonBackgroundColor, alignment, padding, textStyle }) => (
-            <Draggable
-              key={id}
-              id={id}
-              inMiddleBar={true}
-              onDelete={() => handleDelete(id)}
-              onEdit={handleEdit}
-              onDuplicate={() => handleDuplicate(id)}
-              color={color}
-              fontSize={fontSize}
-              backgroundColor={backgroundColor}
-              buttonBackgroundColor={buttonBackgroundColor} // Pass buttonBackgroundColor here
-              alignment={alignment}
-              padding={padding}
-              textStyle={textStyle}
-              onSelectForStyle={() => setSelectedItemId(id)}
-            >
-              {content}
-            </Draggable>
-          ))}
-        </Middlebar>
-        {selectedItemId && (
-          <Leftbar
-            onAlign={(align) => handleItemStyleChange(selectedItemId, { alignment: align })}
-            onPaddingChange={(newPadding) => handleItemStyleChange(selectedItemId, { padding: { ...newPadding } })}
-            onColorChange={(newColor) => handleItemStyleChange(selectedItemId, { color: newColor })}
-            onFontSizeChange={(newFontSize) => handleItemStyleChange(selectedItemId, { fontSize: newFontSize })}
-            onBackgroundColorChange={(newBackgroundColor) => handleItemStyleChange(selectedItemId, { backgroundColor: newBackgroundColor })}
-            onButtonBackgroundColorChange={(newButtonBackgroundColor) => handleItemStyleChange(selectedItemId, { buttonBackgroundColor: newButtonBackgroundColor })} // Allow change of button background color
-            onTextStyleChange={(newTextStyle) => handleTextStyleChange(selectedItemId, newTextStyle)}
-          />
-        )}
-      </div>
-      <button onClick={saveHTML} style={{ padding: '10px 20px', margin: '20px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>
-        Save as HTML
-      </button>
-      <button onClick={sendEmail} style={{ padding: '10px 20px', margin: '20px', cursor: 'pointer', backgroundColor: '#28a745', color: 'white', border: 'none', borderRadius: '4px' }}>
-        Send Email
-      </button>
-    </DndContext>
-  );
 }
 
 export default App;

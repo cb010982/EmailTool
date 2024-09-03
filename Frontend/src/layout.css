@@ -1,0 +1,272 @@
+/* src/components/Sidebar.css */
+.sidenav {
+    width: 200px;
+    height: 100vh;
+    background-color: #333;
+    color: white;
+    padding: 15px;
+  }
+  
+  .sidenav h2 {
+    margin-top: 0;
+  }
+  
+  .sidenav ul {
+    list-style-type: none;
+    padding-left: 0;
+  }
+  
+  .sidenav ul li {
+    margin: 15px 0;
+  }
+  
+  .sidenav ul li a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .sidenav ul li a:hover {
+    text-decoration: underline;
+  }
+  
+  /* src/components/Layout.css */
+  .layout {
+    display: flex;
+  }
+  
+  .content {
+    padding: 20px;
+    flex: 1;
+  }
+  
+  /* src/layout.css */
+.subscribers-content {
+    padding: 20px;
+  }
+  /* src/layout.css */
+.subscribers-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .subscribers-content {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .subscribers-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .create-group-button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .create-group-button:hover {
+    background-color: #0056b3;
+  }
+  
+  .search-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-bar {
+    padding: 8px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+  }
+  
+  .search-button {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .search-button:hover {
+    background-color: #218838;
+  }
+  
+  .subscribers-actions {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .search-bar {
+    padding: 8px;
+    margin-right: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+  }
+  
+  .create-group-button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white !important;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .create-group-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* src/layout.css */
+
+/* Common Container Styling */
+.campaigns-container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .campaigns-content {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .campaigns-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  /* Create Campaign Button */
+  .create-campaign-button {
+    padding: 8px 16px;
+    background-color: #007bff;
+    color: white !important;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .create-campaign-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Search Section Styling */
+  .search-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-bar {
+    padding: 8px;
+    margin-right: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    width: 200px;
+  }
+  
+  .search-button {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .search-button:hover {
+    background-color: #218838;
+  }
+  
+  /* Campaign List Styling */
+  .campaign-list {
+    margin-top: 20px;
+  }
+  
+  .campaign-item {
+    background-color: #2d2d2d;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  /* Modal Styling */
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    background-color: #2d2d2d;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 100%;
+  }
+  h2{
+    color:white;
+  }
+  
+  .modal-input {
+    width: 92%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    color: #000000;
+  }
+  
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .modal-button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .modal-button.cancel {
+    background-color: #ccc;
+    color: #000;
+  }
+  
+  .modal-button.create {
+    background-color: #28a745;
+    color: white;
+  }
+  
+  .modal-button.create:hover {
+    background-color: #218838;
+  }
+  
+  .modal-button.cancel:hover {
+    background-color: #bbb;
+  }
+  
