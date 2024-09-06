@@ -1,4 +1,5 @@
 import dash
+import dash_bootstrap_components as dbc  # New
 from dash import dcc, html, dash_table, Input, Output, State
 from dash.dependencies import ALL  # Import ALL for pattern matching
 import pandas as pd
@@ -6,7 +7,8 @@ import io
 import base64
 from sqlalchemy import create_engine, Table, MetaData
 
-app = dash.Dash(__name__, suppress_callback_exceptions=True)
+# Initialize the app with Bootstrap theme
+app = dash.Dash(__name__, suppress_callback_exceptions=True, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 categories = [
     "first_name", "last_name", "email", "phone", "mobile_phone", "country",
@@ -20,38 +22,49 @@ metadata = MetaData()
 metadata.reflect(bind=engine)
 leads_table = metadata.tables['leads']
 
-app.layout = html.Div([
+# Layout for the app
+app.layout = dbc.Container([  # Use Bootstrap container for better layout management
     dcc.Location(id='url', refresh=False),  # Component to handle URLs
     html.Div(id='page-content'),  # Div to display page content based on URL
-])
+], fluid=True)
 
 # Function to render the upload page
 def render_upload_page(group_name):
-    return html.Div([
-        html.H2(f"CSV File Uploader for Group: {group_name}"),
-        dcc.Upload(
-            id='upload-data',
-            children=html.Div([
-                'Drag and Drop or ',
-                html.A('Select Files')
-            ]),
-            style={
-                'width': '100%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
-            multiple=False
+    return dbc.Container([  # Use Bootstrap container for better layout management
+        dbc.Row(dbc.Col(html.H2(f"CSV File Uploader for Group: {group_name}"), className="text-center mb-4")),  # Center and space title
+        dbc.Row(
+            dbc.Col(
+                dcc.Upload(
+                    id='upload-data',
+                    children=html.Div([
+                        'Drag and Drop or ',
+                        html.A('Select Files', style={"color": "#007bff", "cursor": "pointer"})  # Styled link
+                    ]),
+                    style={
+                        'width': '100%',
+                        'height': '80px',
+                        'lineHeight': '80px',
+                        'borderWidth': '2px',
+                        'borderStyle': 'dashed',
+                        'borderRadius': '10px',
+                        'textAlign': 'center',
+                        'margin': '20px 0',
+                        'backgroundColor': '#f9f9f9'
+                    },
+                    multiple=False
+                ), width=12
+            )
         ),
-        html.Div(id='output-data-upload'),
-        html.Button('Save to Database', id='save-button', n_clicks=0),
-        html.Div(id='save-output'),
+        html.Div(id='output-data-upload', className='mt-4'),
+        dbc.Row(
+            dbc.Col(
+                dbc.Button("Save to Database", id='save-button', color="primary", className="mt-4", n_clicks=0),
+                width=12, className="text-center"
+            )
+        ),
+        html.Div(id='save-output', className='mt-4 text-center'),
         dcc.Store(id='stored-group-name', data=group_name)  # Store the group name for later use
-    ])
+    ], fluid=True)
 
 # Callback to update page content based on URL
 @app.callback(
@@ -61,10 +74,9 @@ def render_upload_page(group_name):
 def display_page(pathname):
     if pathname.startswith('/upload/'):
         group_name = pathname.split('/')[-1]  # Extract group name from URL
-        print(f"Navigating to upload page for group: {group_name}")
         return render_upload_page(group_name)
     else:
-        return html.Div(['404 Page Not Found'])
+        return dbc.Container([html.H2('404 Page Not Found', className="text-center")], fluid=True)
 
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
@@ -80,6 +92,7 @@ def parse_contents(contents, filename):
     
     return df
 
+# Callback to display uploaded data with column headers
 @app.callback(
     Output('output-data-upload', 'children'),
     [Input('upload-data', 'contents')],
@@ -94,30 +107,29 @@ def update_output(contents, filename):
             table_and_dropdowns = []
             
             for col in columns:
-                column_div = html.Div([
-                    html.H4(col),
-                    dash_table.DataTable(
+                # We display the column name as a header inside the data table
+                column_div = dbc.Row([
+                    dbc.Col(dash_table.DataTable(
                         data=df[[col]].to_dict('records'),
-                        columns=[{'name': col, 'id': col}],
-                        style_table={'width': '40%', 'display': 'inline-block', 'verticalAlign': 'top'},
+                        columns=[{'name': col, 'id': col}],  # Display column header
+                        style_table={'width': '100%', 'height': 'auto'},
+                        style_header={'fontWeight': 'bold'},  # Make header bold
                         style_cell={'textAlign': 'left'}
-                    ),
-                    html.Div([
-                        html.Label(f"Categorize '{col}':"),
-                        dcc.Dropdown(
-                            id={'type': 'category-dropdown', 'index': col},
-                            options=[{'label': cat, 'value': cat} for cat in categories],
-                            value="other"  
-                        ),
-                    ], style={'width': '40%', 'display': 'inline-block', 'verticalAlign': 'top', 'marginLeft': '5%'})
-                ], style={'display': 'flex', 'marginBottom': '20px'})
+                    ), width=8),  # Adjust the table width
+                    dbc.Col(dcc.Dropdown(
+                        id={'type': 'category-dropdown', 'index': col},
+                        options=[{'label': cat, 'value': cat} for cat in categories],
+                        value="other"
+                    ), width=4)  # Adjust the dropdown width
+                ], className="mb-4")
 
                 table_and_dropdowns.append(column_div)
 
-            return html.Div(table_and_dropdowns)         
+            return html.Div(table_and_dropdowns)
     
-    return html.Div(['No file uploaded yet.'])
+    return html.Div(['No file uploaded yet.'], className="text-center mt-4")
 
+# Callback to handle saving to the database
 @app.callback(
     Output('save-output', 'children'),
     Input('save-button', 'n_clicks'),
@@ -134,19 +146,15 @@ def save_to_database(n_clicks, contents, filename, group_name, dropdown_values):
             # Add the group name to each row in the dataframe
             data_to_insert['group_name'] = [group_name] * len(df)
 
-            # Ensure all NOT NULL fields have values, add defaults if necessary
-            if 'first_name' not in data_to_insert:
-                data_to_insert['first_name'] = ['Unknown'] * len(df)
-
             mapped_df = pd.DataFrame(data_to_insert)
 
             try:
                 with engine.connect() as conn:
                     mapped_df.to_sql('leads', con=conn, if_exists='append', index=False)
 
-                return f"Successfully saved {len(mapped_df)} records to the database under group '{group_name}'."
+                return dbc.Alert(f"Successfully saved {len(mapped_df)} records to the database under group '{group_name}'.", color="success")
             except Exception as e:
-                return f"Error saving to database: {e}"
+                return dbc.Alert(f"Error saving to database: {e}", color="danger")
 
     return ""
 

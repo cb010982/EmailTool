@@ -1,28 +1,36 @@
 import sqlite3
 
-def init_db():
-    conn = sqlite3.connect('leads.db')
-    cursor = conn.cursor()
-    # Drop the existing leads table
-    cursor.execute('DROP TABLE IF EXISTS leads')
-    # Create the leads table with the new schema
+# Function to create a table and insert email addresses
+def create_test_table():
+    # Connect to the SQLite database (or create it if it doesn't exist)
+    connection = sqlite3.connect('your_database.db')
+    cursor = connection.cursor()
+
+    # Create the table if it doesn't exist
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS leads (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        first_name TEXT NOT NULL,
-        last_name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        company_name TEXT,
-        country TEXT,
-        job_title TEXT,
-        mobile_phone TEXT,
-        phone TEXT,
-        linkedin_url TEXT,
-        industry TEXT,
-        department TEXT,
-        company_size TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-    )
+        CREATE TABLE IF NOT EXISTS test_recipients (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            email TEXT NOT NULL
+        )
     ''')
-    conn.commit()
-    conn.close()
+
+    # List of emails to insert
+    emails = [
+        "senujidimansa@gmail.com",
+        "senuji@acumenintelligence.com",
+        "mufaddalm@techmeedigital.com",
+        "maadm@techmeedigital.com"
+    ]
+
+    # Insert email addresses into the table
+    cursor.executemany('INSERT INTO test_recipients (email) VALUES (?)', [(email,) for email in emails])
+
+    # Commit the transaction and close the connection
+    connection.commit()
+    connection.close()
+
+    print("Table created and emails inserted successfully.")
+
+# Call the function to create the table and insert emails
+if __name__ == "__main__":
+    create_test_table()
