@@ -42,5 +42,5 @@ def send_test_email(html_file_path):
 
 # Specify the path to the HTML file
 if __name__ == "__main__":
-    html_file_path = 'E:\email-builder\Frontend\src\email_template (3).html'  
+    html_file_path = 'E:\email-builder\Frontend\src\email_template (8).html'  
     send_test_email(html_file_path)

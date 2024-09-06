@@ -60,4 +60,73 @@
   .modal-button.cancel:hover {
     background-color: #bbb;
   }
+  .subscribers-container {
+    display: flex;
+  }
+  
+  .subscribers-content {
+    flex-grow: 1;
+    padding: 20px;
+  }
+  
+  .subscribers-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  
+  .create-group-button {
+    background-color: #007bff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .search-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .search-bar {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+  }
+  
+  .search-button {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+  }
+  
+  .group-list {
+    margin-top: 20px;
+  }
+  
+  .group-item {
+    background-color: #343a40;  /* Dark background similar to the Campaigns page */
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 4px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .group-item a {
+    color: white;
+    text-decoration: none;
+  }
+  
+  .group-item a:hover {
+    text-decoration: underline;
+  }
+  
+  .group-item:hover {
+    background-color: #495057; /* Slightly lighter on hover */
+  }
   

@@ -14,6 +14,7 @@ categories = [
     "department", "other"
 ]
 
+# Initialize the database engine and reflect the tables
 engine = create_engine('sqlite:///leads.db')
 metadata = MetaData()
 metadata.reflect(bind=engine)
@@ -60,6 +61,7 @@ def render_upload_page(group_name):
 def display_page(pathname):
     if pathname.startswith('/upload/'):
         group_name = pathname.split('/')[-1]  # Extract group name from URL
+        print(f"Navigating to upload page for group: {group_name}")
         return render_upload_page(group_name)
     else:
         return html.Div(['404 Page Not Found'])
@@ -73,6 +75,7 @@ def parse_contents(contents, filename):
         else:
             return None
     except Exception as e:
+        print(f"Error parsing file: {e}")
         return None
     
     return df
@@ -131,12 +134,19 @@ def save_to_database(n_clicks, contents, filename, group_name, dropdown_values):
             # Add the group name to each row in the dataframe
             data_to_insert['group_name'] = [group_name] * len(df)
 
+            # Ensure all NOT NULL fields have values, add defaults if necessary
+            if 'first_name' not in data_to_insert:
+                data_to_insert['first_name'] = ['Unknown'] * len(df)
+
             mapped_df = pd.DataFrame(data_to_insert)
 
-            with engine.connect() as conn:
-                mapped_df.to_sql('leads', con=conn, if_exists='append', index=False)
+            try:
+                with engine.connect() as conn:
+                    mapped_df.to_sql('leads', con=conn, if_exists='append', index=False)
 
-            return f"Successfully saved {len(mapped_df)} records to the database under group '{group_name}'."
+                return f"Successfully saved {len(mapped_df)} records to the database under group '{group_name}'."
+            except Exception as e:
+                return f"Error saving to database: {e}"
 
     return ""
 
