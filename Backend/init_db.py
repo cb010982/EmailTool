@@ -1,36 +1,19 @@
 import sqlite3
 
-# Function to create a table and insert email addresses
-def create_test_table():
-    # Connect to the SQLite database (or create it if it doesn't exist)
-    connection = sqlite3.connect('your_database.db')
-    cursor = connection.cursor()
+# Connect to SQLite database (or create it if it doesn't exist)
+conn = sqlite3.connect('image_store.db')
 
-    # Create the table if it doesn't exist
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS test_recipients (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            email TEXT NOT NULL
-        )
-    ''')
+# Create a cursor object
+cursor = conn.cursor()
 
-    # List of emails to insert
-    emails = [
-        "senujidimansa@gmail.com",
-        "senuji@acumenintelligence.com",
-        "mufaddalm@techmeedigital.com",
-        "maadm@techmeedigital.com"
-    ]
+# Create a table to store image paths
+cursor.execute('''
+    CREATE TABLE IF NOT EXISTS images (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        image_path TEXT NOT NULL
+    )
+''')
 
-    # Insert email addresses into the table
-    cursor.executemany('INSERT INTO test_recipients (email) VALUES (?)', [(email,) for email in emails])
-
-    # Commit the transaction and close the connection
-    connection.commit()
-    connection.close()
-
-    print("Table created and emails inserted successfully.")
-
-# Call the function to create the table and insert emails
-if __name__ == "__main__":
-    create_test_table()
+# Commit changes and close the connection
+conn.commit()
+conn.close()
